@@ -976,6 +976,14 @@
     "install": "تثبيت",
     "notNow": "ليس الآن"
   },
+  "swUpdateBanner": {
+    "ariaLabel": "تحديث خادم الخدمة متاح",
+    "updateAvailable": "إصدار جديد من Kora Protocol متاح.",
+    "updateDeferredDuringSigning": "التحديث متاح — سيتم تطبيقه بعد اكتمال التوقيع.",
+    "update": "تحديث",
+    "later": "لاحقًا",
+    "close": "إغلاق لافتة التحديث"
+  },
   "changelog": {
     "latestBadge": "الأحدث",
     "noDetails": "لا تتوفر تفاصيل.",

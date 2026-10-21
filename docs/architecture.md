@@ -540,7 +540,15 @@ Most interactive pages are client-rendered because they require wallet state. In
 4. **IPFS content addressing.** Invoice documents are content-addressed — the CID stored on-chain is a cryptographic hash of the content, making tampering detectable.
 5. **Contract simulation.** Every transaction is simulated before signing. Simulation errors surface to the user before they're asked to sign.
 6. **No custodial funds.** The frontend never holds or transfers user funds directly. All value flows through Soroban smart contracts.
-7. **PWA Service Worker Cache Security.** Wallet-gated and sensitive routes (`/dashboard/*`, `/transactions/*`, `/invoice/create/*`, `/api/*`) are explicitly excluded from Service Worker caching (`NetworkOnly` rule in `next.config.js`) and serve HTTP `Cache-Control: no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0` headers. Service worker update listeners guard against reloads during active wallet cryptographic signing sessions.
+7. **PWA Service Worker Cache & Activation Security** (#984):
+   - **Cache Rules:** Wallet-gated and sensitive routes (`/dashboard/*`, `/transactions/*`, `/invoice/create/*`, `/api/*`) are explicitly excluded from Service Worker caching via `NetworkOnly` rule in `next.config.js` and serve `Cache-Control: no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0` HTTP headers.
+   - **Deferred Activation Policy:** Service worker updates follow a user-driven, explicit activation model to prevent interrupting wallet signing sessions:
+     - `skipWaiting: false` and `clientsClaim: false` in `next.config.js` prevent automatic full-page reload when a new worker installs.
+     - When a waiting worker is detected, the `SwUpdateBanner` component surfaces an update prompt.
+     - User clicks "Update" → `SwUpdateBanner` sends `SKIP_WAITING` postMessage to the waiting worker.
+     - Waiting worker activates and claims clients; `controllerchange` event fires in `providers.tsx`.
+     - The listener checks `uiStore.txState.status === "signing"`. If true, reload is deferred until signing completes. If false, page reloads to activate new code and cache version.
+     - This ensures no full-page interruption during active wallet cryptographic operations.
 
 ---
 

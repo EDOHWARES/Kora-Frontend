@@ -976,6 +976,14 @@
     "install": "Instalar",
     "notNow": "Ahora no"
   },
+  "swUpdateBanner": {
+    "ariaLabel": "Actualización de service worker disponible",
+    "updateAvailable": "Una nueva versión de Kora Protocol está disponible.",
+    "updateDeferredDuringSigning": "Actualización disponible — se aplicará después de que completes la firma.",
+    "update": "Actualizar",
+    "later": "Luego",
+    "close": "Cerrar bandera de actualización"
+  },
   "changelog": {
     "latestBadge": "Más Reciente",
     "noDetails": "Sin detalles disponibles.",

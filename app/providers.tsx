@@ -11,6 +11,10 @@ import { useWatchlistAlerts } from "@/hooks/useWatchlistAlerts";
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 
+const SwUpdateBanner = dynamic(
+  () => import("@/components/pwa/SwUpdateBanner").then((m) => m.SwUpdateBanner),
+  { ssr: false, loading: () => null }
+);
 const WalletConnectModal = dynamic(
   () => import("@/components/wallet/WalletConnectModal").then((m) => m.WalletConnectModal),
   { ssr: false, loading: () => null }
@@ -183,11 +187,22 @@ export function Providers({ children }: { children: React.ReactNode }) {
     if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
 
     const handleControllerChange = () => {
-      // Guard: do not reload or interrupt if user is currently signing a transaction
+      // Guard: do not reload if user is currently signing a transaction
       const isSigning = useUIStore.getState().txState.status === "signing";
       if (isSigning) {
         console.warn("[PWA] Service worker update deferred during active wallet signing session.");
         return;
+      }
+
+      // Controller changed successfully — new SW is now active and claiming clients.
+      // Coordinate with SwUpdateBanner: if user explicitly sent SKIP_WAITING message,
+      // reload the page to activate the new code and cache version.
+      // Check if this was a user-triggered update (will be true if SwUpdateBanner sent SKIP_WAITING)
+      const wasUserTriggeredUpdate = sessionStorage.getItem("pwa-update-triggered") === "true";
+      if (wasUserTriggeredUpdate) {
+        sessionStorage.removeItem("pwa-update-triggered");
+        console.info("[PWA] Reloading to activate new service worker version.");
+        window.location.reload();
       }
     };
 
@@ -213,6 +228,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
           <InProgressOverlay />
           <TransactionAnnouncer />
           <InstallPrompt />
+          <SwUpdateBanner />
           <FeedbackWidget />
           <KeyboardShortcutsProvider />
           <CommandPalette />

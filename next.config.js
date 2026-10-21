@@ -8,7 +8,15 @@ const withBundleAnalyzer = require("@next/bundle-analyzer")({
 const withPWA = require("@ducanh2912/next-pwa").default({
   dest: "public",
   register: true,
-  skipWaiting: true,
+  // Deferred SW activation policy (#984):
+  // Disabled to prevent automatic full-page reloads during user sessions.
+  // A waiting worker will remain dormant until explicitly activated via
+  // SwUpdateBanner (user confirms the update). This ensures:
+  //  1. No interruption during active wallet signing sessions
+  //  2. User controls when cache invalidation takes effect
+  //  3. Predictable, coordinated cache and code updates
+  skipWaiting: false,
+  clientsClaim: false,
   disable: process.env.NODE_ENV === "development",
 
   // ── Cache rules ────────────────────────────────────────────────────────────
